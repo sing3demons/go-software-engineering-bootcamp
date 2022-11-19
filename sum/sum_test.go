@@ -16,3 +16,11 @@ func TestSumShouldReturn1WhenInput1and0(t *testing.T) {
 		t.Errorf("sum(1, 0) = %d; want 1", got)
 	}
 }
+
+func TestSumShouldReturnMinus2WhenInput1andMinus1(t *testing.T) {
+	got := sum(-1, -1)
+
+	if got != -2 {
+		t.Errorf("sum(-1, -1) = %d; want -2", got)
+	}
+}
