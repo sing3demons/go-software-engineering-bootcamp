@@ -1,6 +1,10 @@
-package ticket
+package ticket_test
 
-import "testing"
+import (
+	"testing"
+
+	"github.com/sing3demons/softq/ticket"
+)
 
 type testCase struct {
 	name string
@@ -22,7 +26,7 @@ func TestTicketPrice(t *testing.T) {
 
 	for _, tc := range tests {
 		t.Run(tc.name, func(t *testing.T) {
-			got := Price(uint(tc.age))
+			got := ticket.Price(uint(tc.age))
 
 			if got != tc.want {
 				t.Errorf("Price(%d) = %f; want %f", tc.age, got, tc.want)

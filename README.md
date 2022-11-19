@@ -4,6 +4,12 @@
 go test -v ./...
 ```
 
+```check test cover ticket module
+go test -cover ./ticket 
+go test -cover -coverprofile=c.out ./ticket
+go tool cover -html=c.out -o coverage.html
+```
+
 ## Arrange, Act, Assert pattern
 
 ```example test pattern Go
