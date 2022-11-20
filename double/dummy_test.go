@@ -1,0 +1,19 @@
+package double
+
+import "testing"
+
+type DummySearch struct{}
+
+func (DummySearch) Search(people *[]Person, firstName string, lastName string) *Person {
+	return &Person{}
+}
+
+func TestFindIsShouldReturnsErrorWhenFirstNameOrLastName(t *testing.T) {
+	phoneBook := &PhoneBook{}
+	want := ErrMissingArgs
+	_, got := phoneBook.Find(DummySearch{}, "", "")
+
+	if got != want {
+		t.Errorf("Want '%s', got '%s'", want, got)
+	}
+}

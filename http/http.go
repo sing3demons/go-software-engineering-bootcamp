@@ -2,7 +2,7 @@ package http
 
 import (
 	"encoding/json"
-	"io/ioutil"
+	"io"
 	"net/http"
 )
 
@@ -19,7 +19,7 @@ func MakeHTTPCall(url string) (*Response, error) {
 		return nil, err
 	}
 
-	body, err := ioutil.ReadAll(resp.Body)
+	body, err := io.ReadAll(resp.Body)
 	if err != nil {
 		return nil, err
 	}
