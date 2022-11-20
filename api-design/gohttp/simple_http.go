@@ -2,6 +2,7 @@ package main
 
 import (
 	"encoding/json"
+	"fmt"
 	"io"
 	"log"
 	"net/http"
@@ -13,8 +14,9 @@ type User struct {
 	Age  int    `json:"age"`
 }
 
+var users []User = []User{{ID: 1, Name: "sing", Age: 21}}
+
 func main() {
-	users := []User{{ID: 1, Name: "sing", Age: 21}}
 	http.HandleFunc("/users", func(w http.ResponseWriter, r *http.Request) {
 		if r.Method == http.MethodGet {
 
@@ -31,18 +33,26 @@ func main() {
 			body, err := io.ReadAll(r.Body)
 			if err != nil {
 				w.WriteHeader(http.StatusInternalServerError)
-				w.Write([]byte(err.Error()))
+				fmt.Fprintf(w, "error : %v", err)
+				return
 			}
 
+			id := len(users) + 1
+
 			user := User{}
+			user.ID = id
 
 			err = json.Unmarshal(body, &user)
 			if err != nil {
-				w.WriteHeader(http.StatusInternalServerError)
-				w.Write([]byte(err.Error()))
+				w.WriteHeader(http.StatusBadRequest)
+				fmt.Fprintf(w, "error : %v", err)
+				return
 			}
 
-			w.Write(body)
+			users = append(users, user)
+
+			// w.Write(body)
+			fmt.Fprintf(w, "create user")
 			return
 		}
 
