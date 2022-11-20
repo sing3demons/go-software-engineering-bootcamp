@@ -1,19 +1,58 @@
 package main
 
 import (
+	"encoding/json"
+	"fmt"
+	"io"
 	"log"
 	"net/http"
 )
 
+type User struct {
+	ID   int    `json:"id"`
+	Name string `json:"name"`
+	Age  int    `json:"age"`
+}
+
+var users []User = []User{{ID: 1, Name: "sing", Age: 21}}
+
 func main() {
-	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
+	http.HandleFunc("/users", func(w http.ResponseWriter, r *http.Request) {
 		if r.Method == http.MethodGet {
-			w.Write([]byte(`{"name": "sing", "method": "GET"}`))
+
+			b, err := json.Marshal(users)
+			if err != nil {
+				w.WriteHeader(http.StatusInternalServerError)
+				w.Write([]byte(err.Error()))
+			}
+			w.Write(b)
 			return
 		}
 
 		if r.Method == http.MethodPost {
-			w.Write([]byte(`{"name": "sing", "method": "POST"}`))
+			body, err := io.ReadAll(r.Body)
+			if err != nil {
+				w.WriteHeader(http.StatusInternalServerError)
+				fmt.Fprintf(w, "error : %v", err)
+				return
+			}
+
+			id := len(users) + 1
+
+			user := User{}
+			user.ID = id
+
+			err = json.Unmarshal(body, &user)
+			if err != nil {
+				w.WriteHeader(http.StatusBadRequest)
+				fmt.Fprintf(w, "error : %v", err)
+				return
+			}
+
+			users = append(users, user)
+
+			// w.Write(body)
+			fmt.Fprintf(w, "create user")
 			return
 		}
 
@@ -22,5 +61,4 @@ func main() {
 
 	log.Println("Server started as :2565")
 	log.Fatal(http.ListenAndServe(":2565", nil))
-	log.Println("Server stop")
 }
