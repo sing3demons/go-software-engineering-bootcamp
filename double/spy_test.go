@@ -7,7 +7,7 @@ type SpySearch struct {
 	searchWatchCalled bool
 }
 
-func (ss *SpySearch) Search(people *[]Person, firstName string, lastName string) *Person {
+func (ss *SpySearch) Search(people []*Person, firstName string, lastName string) *Person {
 	ss.searchWatchCalled = true
 	return &Person{
 		FirstName: firstName,

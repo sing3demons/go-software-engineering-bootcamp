@@ -5,7 +5,7 @@ import "testing"
 // Stub return ของ เฉยๆ
 type StubSearch struct{ phone string }
 
-func (ss StubSearch) Search(people *[]Person, firstName string, lastName string) *Person {
+func (ss StubSearch) Search(people []*Person, firstName string, lastName string) *Person {
 	return &Person{
 		FirstName: firstName,
 		LastName:  lastName,

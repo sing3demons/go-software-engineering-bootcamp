@@ -8,7 +8,7 @@ var (
 )
 
 type Queryer interface {
-	Search(people *[]Person, firstName string, lastName string) *Person
+	Search(people []*Person, firstName string, lastName string) *Person
 }
 
 type Person struct {
@@ -17,7 +17,7 @@ type Person struct {
 	Phone     string
 }
 
-type PhoneBook struct{ People *[]Person }
+type PhoneBook struct{ People []*Person }
 
 func (p *PhoneBook) Find(query Queryer, firstName string, lastName string) (string, error) {
 	if firstName == "" || lastName == "" {

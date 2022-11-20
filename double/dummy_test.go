@@ -6,7 +6,7 @@ import "testing"
 // Dummy ส่งของไปให้พารามิตเตอร์ผ่าน
 type DummySearch struct{}
 
-func (DummySearch) Search(people *[]Person, firstName string, lastName string) *Person {
+func (DummySearch) Search(people []*Person, firstName string, lastName string) *Person {
 	return &Person{}
 }
 
