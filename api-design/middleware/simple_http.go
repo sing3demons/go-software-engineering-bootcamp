@@ -6,6 +6,7 @@ import (
 	"io"
 	"log"
 	"net/http"
+	"time"
 )
 
 type User struct {
@@ -21,9 +22,17 @@ func healthHandler(w http.ResponseWriter, r *http.Request) {
 	w.Write([]byte("OK"))
 }
 
+func logMiddleware(next http.HandlerFunc) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		start := time.Now()
+		next.ServeHTTP(w, r)
+		log.Printf("Server http middleware: %s %s %s %s", r.RemoteAddr, r.Method, r.URL, time.Since(start))
+	}
+}
+
 func main() {
-	http.HandleFunc("/users", usersHandle)
-	http.HandleFunc("/health", healthHandler)
+	http.HandleFunc("/users", logMiddleware(usersHandle))
+	http.HandleFunc("/health", logMiddleware(healthHandler))
 
 	log.Println("Server started as :2565")
 	log.Fatal(http.ListenAndServe(":2565", nil))
