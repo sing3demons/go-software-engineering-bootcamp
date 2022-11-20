@@ -34,3 +34,8 @@ func TestSum1(t *testing.T) {
 ```
 go get -u github.com/stretchr/testify
 ```
+
+## test library -> is
+```
+go get -u github.com/matryer/is
+```
