@@ -2,6 +2,8 @@ package double
 
 import "testing"
 
+
+// Dummy ส่งของไปให้พารามิตเตอร์ผ่าน
 type DummySearch struct{}
 
 func (DummySearch) Search(people *[]Person, firstName string, lastName string) *Person {
