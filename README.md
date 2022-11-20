@@ -5,7 +5,7 @@ go test -v ./...
 ```
 
 ```check test cover ticket module
-go test -cover ./ticket 
+go test -cover ./ticket
 go test -cover -coverprofile=c.out ./ticket
 go tool cover -html=c.out -o coverage.html
 ```
@@ -27,4 +27,15 @@ func TestSum1(t *testing.T) {
 		}
 	})
 }
+```
+
+## test library -> testify
+
+```
+go get -u github.com/stretchr/testify
+```
+
+## test library -> is
+```
+go get -u github.com/matryer/is
 ```
