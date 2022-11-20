@@ -1,19 +1,48 @@
 package main
 
 import (
+	"encoding/json"
+	"io"
 	"log"
 	"net/http"
 )
 
+type User struct {
+	ID   int    `json:"id"`
+	Name string `json:"name"`
+	Age  int    `json:"age"`
+}
+
 func main() {
-	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
+	users := []User{{ID: 1, Name: "sing", Age: 21}}
+	http.HandleFunc("/users", func(w http.ResponseWriter, r *http.Request) {
 		if r.Method == http.MethodGet {
-			w.Write([]byte(`{"name": "sing", "method": "GET"}`))
+
+			b, err := json.Marshal(users)
+			if err != nil {
+				w.WriteHeader(http.StatusInternalServerError)
+				w.Write([]byte(err.Error()))
+			}
+			w.Write(b)
 			return
 		}
 
 		if r.Method == http.MethodPost {
-			w.Write([]byte(`{"name": "sing", "method": "POST"}`))
+			body, err := io.ReadAll(r.Body)
+			if err != nil {
+				w.WriteHeader(http.StatusInternalServerError)
+				w.Write([]byte(err.Error()))
+			}
+
+			user := User{}
+
+			err = json.Unmarshal(body, &user)
+			if err != nil {
+				w.WriteHeader(http.StatusInternalServerError)
+				w.Write([]byte(err.Error()))
+			}
+
+			w.Write(body)
 			return
 		}
 
@@ -22,5 +51,4 @@ func main() {
 
 	log.Println("Server started as :2565")
 	log.Fatal(http.ListenAndServe(":2565", nil))
-	log.Println("Server stop")
 }
