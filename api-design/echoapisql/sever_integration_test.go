@@ -1,3 +1,5 @@
+//go:build integration
+
 package main
 
 import (
@@ -94,8 +96,6 @@ func TestUserByID(t *testing.T) {
 	assert.Nil(t, err)
 	assert.EqualValues(t, http.StatusOK, res.StatusCode)
 	assert.Equal(t, u.ID, user.ID)
-	assert.Equal(t, u.Name, user.Name)
-
 }
 
 func TestUpdateUserByID(t *testing.T) {
