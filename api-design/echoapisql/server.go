@@ -43,21 +43,44 @@ func main() {
 	e := echo.New()
 	e.Use(middleware.Logger())
 	e.Use(middleware.Recover())
-
-	// e.Use(middleware.BasicAuth(func(username, password string, ctx echo.Context) (bool, error) {
-	// 	if username == "admin" && password == "1234" {
-	// 		return true, nil
-	// 	}
-
-	// 	return false, nil
-	// }))
-
 	e.GET("/health", healthHandler)
 
+	e.Use(middleware.BasicAuth(func(username, password string, ctx echo.Context) (bool, error) {
+		if username == "admin" && password == "1234" {
+			return true, nil
+		}
+
+		return false, nil
+	}))
+
 	e.GET("/users", getUserHandler)
+	e.GET("/users/:id", getUserHandlerByID)
 	e.POST("/users", createUserHandler)
 
 	e.Logger.Fatal(e.Start(":2565"))
+}
+
+func getUserHandlerByID(c echo.Context) error {
+	var user User
+	stmt, err := db.Prepare("SELECT id, name, age FROM users where id=$1")
+	if err != nil {
+		log.Fatal("can't prepare query one user statement", err)
+	}
+
+	rowId := c.Param("id")
+
+	row := stmt.QueryRow(rowId)
+
+	err = row.Scan(&user.ID, &user.Name, &user.Age)
+	switch err {
+	case sql.ErrNoRows:
+		return c.JSON(http.StatusNotFound, Err{Message: "user not found"})
+	case nil:
+		return c.JSON(http.StatusOK, user)
+	default:
+		return c.JSON(http.StatusOK, Err{Message: "can't scan user" + err.Error()})
+	}
+
 }
 
 func getUserHandler(c echo.Context) error {

@@ -5,9 +5,11 @@ import (
 	"encoding/json"
 	"io"
 	"net/http"
+	"strconv"
 	"strings"
 	"testing"
 
+	"github.com/labstack/echo/v4"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -26,22 +28,15 @@ func (r *Response) Decode(v interface{}) error {
 func request(method, url string, body io.Reader) *Response {
 	req, _ := http.NewRequest(method, url, body)
 	req.Header.Add("Authorization", "Basic YWRtaW46MTIzNA==")
-	req.Header.Add("Content-Type", "application/json")
+	// req.Header.Add("Content-Type", "application/json")
+	req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 	client := http.Client{}
 	res, err := client.Do(req)
 	return &Response{res, err}
 }
 
 func TestGetAllUser(t *testing.T) {
-	var c User
-	body := bytes.NewBufferString(`{
-		"name": "sing",
-		"age": 25
-	}`)
-
-	if err := request(http.MethodPost, uri("users"), body).Decode(&c); err != nil {
-		t.Fatal("can't create user", err)
-	}
+	seedUser(t)
 
 	var users []User
 	res := request(http.MethodGet, uri("users"), nil)
@@ -59,4 +54,56 @@ func uri(paths ...string) string {
 	}
 	url := append([]string{host}, paths...)
 	return strings.Join(url, "/")
+}
+
+func seedUser(t *testing.T) User {
+	var c User
+	body := bytes.NewBufferString(`{
+		"name": "sing",
+		"age": 25
+	}`)
+
+	if err := request(http.MethodPost, uri("users"), body).Decode(&c); err != nil {
+		t.Fatal("can't create user", err)
+	}
+	return c
+}
+
+func TestCreateUserHandler(t *testing.T) {
+	var c User
+	body := bytes.NewBufferString(`{
+		"name": "sing",
+		"age": 25
+	}`)
+
+	res := request(http.MethodPost, uri("users"), body)
+	err := res.Decode(&c)
+	assert.Nil(t, err)
+	assert.Equal(t, http.StatusCreated, res.StatusCode)
+	assert.NotEqual(t, 0, c.ID)
+
+}
+
+func TestUserByID(t *testing.T) {
+	u := seedUser(t)
+
+	var user User
+	res := request(http.MethodGet, uri("users", strconv.Itoa(u.ID)), nil)
+	err := res.Decode(&user)
+
+	assert.Nil(t, err)
+	assert.EqualValues(t, http.StatusOK, res.StatusCode)
+	assert.Equal(t, u.ID, user.ID)
+	assert.Equal(t, u.Name, user.Name)
+
+}
+
+func TestUpdateUserByID(t *testing.T) {
+	t.Skip("TODO: implement me")
+
+}
+
+func TestDeleteUserByID(t *testing.T) {
+	t.Skip("TODO: implement me")
+
 }
