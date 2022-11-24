@@ -54,22 +54,57 @@ func main() {
 	}))
 
 	e.GET("/users", getUserHandler)
-	e.GET("/users/:id", getUserHandlerByID)
 	e.POST("/users", createUserHandler)
+	e.GET("/users/:id", getUserHandlerByID)
+	e.DELETE("/users/:id", deleteUserHandlerByID)
+	e.PUT("/users/:id", updateUserHandler)
 
 	e.Logger.Fatal(e.Start(":2565"))
+}
+
+func updateUserHandler(c echo.Context) error {
+	id := c.Param("id")
+	var u User
+	err := c.Bind(&u)
+	if err != nil {
+		return c.JSON(http.StatusBadRequest, Err{Message: err.Error()})
+	}
+
+	stmt, err := db.Prepare("UPDATE users SET name=$2, age=$3 WHERE id=$1")
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, Err{Message: "can't scan user" + err.Error()})
+	}
+	_, err = stmt.Exec(id, u.Name, u.Age)
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, Err{Message: "can't scan user" + err.Error()})
+	}
+	return c.JSON(http.StatusNoContent, "Update")
+}
+
+func deleteUserHandlerByID(c echo.Context) error {
+	id := c.Param("id")
+	stmt, err := db.Prepare("DELETE FROM users where id=$1")
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, Err{Message: "can't scan user" + err.Error()})
+	}
+
+	_, err = stmt.Exec(id)
+
+	if err != nil {
+		return c.JSON(http.StatusBadRequest, Err{Message: "can't scan user" + err.Error()})
+	}
+	return c.JSON(http.StatusNoContent, "Delete")
 }
 
 func getUserHandlerByID(c echo.Context) error {
 	var user User
 	stmt, err := db.Prepare("SELECT id, name, age FROM users where id=$1")
 	if err != nil {
-		log.Fatal("can't prepare query one user statement", err)
+		return c.JSON(http.StatusInternalServerError, Err{Message: "can't scan user" + err.Error()})
 	}
-
-	rowId := c.Param("id")
-
-	row := stmt.QueryRow(rowId)
+	
+	id := c.Param("id")
+	row := stmt.QueryRow(id)
 
 	err = row.Scan(&user.ID, &user.Name, &user.Age)
 	switch err {
@@ -78,7 +113,7 @@ func getUserHandlerByID(c echo.Context) error {
 	case nil:
 		return c.JSON(http.StatusOK, user)
 	default:
-		return c.JSON(http.StatusOK, Err{Message: "can't scan user" + err.Error()})
+		return c.JSON(http.StatusInternalServerError, Err{Message: "can't scan user" + err.Error()})
 	}
 
 }
